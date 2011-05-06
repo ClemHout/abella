@@ -52,7 +52,7 @@
     ((eq cmd nil) "helu") ; comment
     ((string-match "Specification.*" cmd) "Reset.")
     ((string-match "Theorem.*" cmd) "abort.")
-    ((string-match "\(Define\|CoDefine\|Kind\|Type\|Split\|Close\).*" cmd) "Back.")
+    ((string-match "\\(Define\\|CoDefine\\|Kind\\|Type\\|Split\\|Close\\).*" cmd) "Back.")
     (t "undo.")))
 
 (defun abella-find-and-forget-fn (span)

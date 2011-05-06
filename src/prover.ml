@@ -167,6 +167,10 @@ let add_defs ids ty defs =
     (fun id -> H.add defs_table id (ty, ids, defs))
     ids
 
+let rm_defs ids =
+  List.iter
+    (fun id -> H.remove defs_table id)
+    ids
 
 (* Undo support *)
 

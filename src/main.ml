@@ -27,6 +27,8 @@ open Printf
 open Debug
 open Accumulate
 
+module H = Hashtbl
+
 let can_read_specification = ref true
 
 let interactive = ref true
@@ -316,14 +318,13 @@ let reset () =
   sign := pervasive_sign ;
   sr := pervasive_sr ;
   can_read_specification := true ;
+  H.clear defs_table ;
 
 
 type action =
     Lemmas of int
   (* | SetValue of string * set_value *)
-  | Sr of Subordination.sr
-  | Sign of string list * ((string * pty) list)
-  | SignSr of (string list * ((string * pty) list)) * Subordination.sr
+  | Def of (string list * ((string * pty) list)) * Subordination.sr * (string list)
   | Nothing
 
 let cancelation_stack = Stack.create ()
@@ -334,9 +335,12 @@ let rec cancel act = match act with
     Lemmas 0 -> ()
   | Nothing -> ()
   | Lemmas n -> begin lemmas := List.tl !lemmas; cancel (Lemmas (n-1)); end
-  | Sign (si1, si2) -> sign := (si1, si2)
-  | Sr sub -> sr := sub
-  | SignSr ((si1, si2), sub) -> begin cancel (Sign (si1, si2)); cancel (Sr sub); end
+  | Def (oldsign, oldsr, ids) ->
+    begin
+      sign := oldsign ;
+      sr := oldsr ;
+      rm_defs ids
+    end
 
 let cancel_last () = cancel (Stack.pop cancelation_stack)
 
@@ -552,7 +556,7 @@ let rec process () =
               let (local_sr, local_sign) = locally_add_global_consts idtys in
               let defs = type_udefs ~sr:local_sr ~sign:local_sign udefs in
                 check_defs ids defs ;
-                cancelation_push (SignSr (!sign,!sr)) ;
+                cancelation_push (Def (!sign,!sr, ids)) ;
                 commit_global_consts local_sr local_sign ;
                 compile (CDefine(idtys, defs)) ;
                 add_defs ids Inductive defs
@@ -562,7 +566,7 @@ let rec process () =
               let (local_sr, local_sign) = locally_add_global_consts idtys in
               let defs = type_udefs ~sr:local_sr ~sign:local_sign udefs in
                 check_defs ids defs ;
-                cancelation_push (SignSr (!sign,!sr)) ;
+                cancelation_push (Def (!sign,!sr, ids)) ;
                 commit_global_consts local_sr local_sign ;
                 compile (CCoDefine(idtys, defs)) ;
                 add_defs ids CoInductive defs
@@ -585,16 +589,16 @@ let rec process () =
         | Query(q) -> query q
         | Kind(ids) ->
             check_noredef ids;
-            let si1, si2 = !sign in cancelation_push (Sign (si1,si2)) ;
+            cancelation_push (Def (!sign, !sr, [])) ;
             add_global_types ids ;
             compile (CKind ids)
         | Type(ids, ty) ->
             check_noredef ids;
-            cancelation_push (SignSr (!sign, !sr)) ;
+            cancelation_push (Def (!sign, !sr, [])) ;
             add_global_consts (List.map (fun id -> (id, ty)) ids) ;
             compile (CType(ids, ty)) ;
         | Close(ids) ->
-            cancelation_push (Sr !sr) ;
+            cancelation_push (Def (!sign, !sr, [])) ;
             close_types ids ;
             compile
               (CClose(List.map
