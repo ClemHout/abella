@@ -424,7 +424,9 @@ let term_witness (t, w) =
       (Tactics.witness_to_string w)
       (metaterm_to_string t)
 
-let rec process_proof name =
+let rec process_proof ?undoing:(undoing = false) ?thm:(thm = sequent.goal) name =
+  if (not undoing) then reset_prover () ;
+  theorem thm ;
   let suppress_display = ref false in
   let finished = ref false in
     try while not !finished do try
@@ -488,7 +490,7 @@ let rec process_proof name =
           exit (if !interactive then 0 else 1)
       | Failure "Proof completed." ->
           fprintf !out "Proof completed.\n%!" ;
-          reset_prover () ;
+          (* reset_prover () ; *)
           finished := true
       | Failure s ->
           eprintf "Error: %s\n%!" s ;
@@ -534,13 +536,29 @@ let rec process () =
         | Theorem(name, thm) ->
             let thm = type_umetaterm ~sr:!sr ~sign:!sign thm in
               check_theorem thm ;
-              theorem thm ;
+              (* theorem thm ; *)
               begin try
-                process_proof name ;
+                process_proof ~thm:thm name;
                 cancelation_push (Lemmas 1);
                 compile (CTheorem(name, thm)) ;
                 add_lemma name thm ;
+                add_lemma_undo_stack name ;
               with AbortProof -> () end
+        | TopUndo -> begin
+            match (Stack.pop cancelation_stack) with
+                Lemmas 1 -> begin
+                  let name, thm = List.hd !lemmas in
+                    lemmas := List.tl !lemmas ;
+                    undo_stack := get_lemma_undo_stack name ;
+                    undo () ;
+                    begin try
+                      process_proof ~undoing:true name;
+                      cancelation_push (Lemmas 1);
+                      compile (CTheorem(name, thm)) ;
+                      add_lemma name thm ;
+                      add_lemma_undo_stack name ;
+                    with AbortProof -> () end end
+              | _ -> failwith "cannot undo at this point" end
         | SSplit(name, names) ->
             let thms = create_split_theorems name names in
               List.iter

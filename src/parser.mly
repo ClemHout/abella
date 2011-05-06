@@ -370,6 +370,7 @@ pure_top_command:
   | CLOSE id_list DOT                    { Types.Close($2) }
   | SSPLIT id DOT                        { Types.SSplit($2, []) }
   | SSPLIT id AS id_list DOT             { Types.SSplit($2, $4) }
+  | UNDO DOT                             { Types.TopUndo }
   | RESET DOT                            { Types.Reset }
   | BACK DOT                             { Types.Back(1) }
   | BACK NUM DOT                         { Types.Back($2) }

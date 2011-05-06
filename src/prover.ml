@@ -190,6 +190,13 @@ let undo () =
         undo_stack := rest
     | [] -> failwith "Nothing left to undo"
 
+let lemma_undo_stack : (string, undo_stack) H.t = H.create (10)
+
+let add_lemma_undo_stack lemma = 
+  H.replace lemma_undo_stack lemma !undo_stack
+
+let get_lemma_undo_stack lemma =
+  H.find lemma_undo_stack lemma
 
 (* Proof state manipulation utilities *)
 

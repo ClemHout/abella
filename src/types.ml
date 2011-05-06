@@ -59,6 +59,7 @@ type top_command =
   | SSplit of id * id list
   | TopCommon of common_command
   | Back of int
+  | TopUndo
   | Reset
 
 type compiled =
@@ -180,6 +181,8 @@ let top_command_to_string tc =
         common_command_to_string cc
     | Back(i) ->
         sprintf "Back %i" i
+    | TopUndo ->
+        "undo"
     | Reset ->
         "Reset"
 
