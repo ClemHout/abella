@@ -58,6 +58,8 @@ type top_command =
   | Close of id list
   | SSplit of id * id list
   | TopCommon of common_command
+  | Back of int
+  | Reset
 
 type compiled =
   | CTheorem of id * metaterm
@@ -176,6 +178,10 @@ let top_command_to_string tc =
           sprintf "Split %s" id
     | TopCommon(cc) ->
         common_command_to_string cc
+    | Back(i) ->
+        sprintf "Back %i" i
+    | Reset ->
+        "Reset"
 
 let withs_to_string ws =
   String.concat ", "

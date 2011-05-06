@@ -321,6 +321,7 @@ let format_sequent fmt =
 
 let format_display fmt =
   pp_open_box fmt 0 ;
+  fprintf fmt ">>\n";
   if sequent.name = "" then
     fprintf fmt "@\n"
   else
@@ -328,6 +329,7 @@ let format_display fmt =
   format_sequent fmt ;
   fprintf fmt "@\n@\n" ;
   format_other_subgoals fmt ;
+  fprintf fmt "<<\n";
   pp_close_box fmt () ;
   pp_print_flush fmt ()
 

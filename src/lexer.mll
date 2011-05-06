@@ -91,6 +91,8 @@ rule token = parse
 | "Import"           { IMPORT }
 | "Specification"    { SPECIFICATION }
 | "Split"            { SSPLIT }
+| "Reset"            { RESET }
+| "Back"             { BACK }
 | "\\/"              { OR }
 | "/\\"              { AND }
 | "{"                { LBRACK }

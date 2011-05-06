@@ -44,8 +44,8 @@
 %token IND INST APPLY CASE SEARCH TO ON WITH INTROS CUT ASSERT CLAUSEEQ
 %token SKIP UNDO ABORT COIND LEFT RIGHT MONOTONE IMPORT BY
 %token SPLIT SPLITSTAR UNFOLD KEEP CLEAR SPECIFICATION SEMICOLON
-%token THEOREM DEFINE PLUS CODEFINE SET ABBREV UNABBREV QUERY SHOW
-%token PERMUTE BACKCHAIN QUIT UNDERSCORE AS SSPLIT
+%token THEOREM DEFINE PLUS CODEFINE SET ABBREV UNABBREV QUERY SHOW BACK
+%token PERMUTE BACKCHAIN QUIT UNDERSCORE AS SSPLIT RESET
 %token COLON RARROW FORALL NABLA EXISTS STAR AT HASH OR AND LBRACK RBRACK
 %token KIND TYPE KKIND TTYPE SIG MODULE ACCUMSIG ACCUM END CLOSE
 
@@ -127,6 +127,8 @@ id:
   | QUIT                                 { "Quit" }
   | QUERY                                { "Query" }
   | SSPLIT                               { "Split" }
+  | RESET                                { "Reset" }
+  | BACK                                 { "Back" }
   | CLOSE                                { "Close" }
   | TTYPE                                { "Type" }
   | KKIND                                { "Kind" }
@@ -368,6 +370,9 @@ pure_top_command:
   | CLOSE id_list DOT                    { Types.Close($2) }
   | SSPLIT id DOT                        { Types.SSplit($2, []) }
   | SSPLIT id AS id_list DOT             { Types.SSplit($2, $4) }
+  | RESET DOT                            { Types.Reset }
+  | BACK DOT                             { Types.Back(1) }
+  | BACK NUM DOT                         { Types.Back($2) }
 
 common_command:
   | SET id id DOT                        { Types.Set($2, Types.Str $3) }

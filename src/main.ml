@@ -308,6 +308,43 @@ let import filename =
     end
 
 
+(* Backing and reseting utility *)
+
+
+let reset () =
+  lemmas := [] ;
+  sign := pervasive_sign ;
+  sr := pervasive_sr ;
+  can_read_specification := true ;
+
+
+type action =
+    Lemmas of int
+  (* | SetValue of string * set_value *)
+  | Sr of Subordination.sr
+  | Sign of string list * ((string * pty) list)
+  | SignSr of (string list * ((string * pty) list)) * Subordination.sr
+  | Nothing
+
+let cancelation_stack = Stack.create ()
+
+let cancelation_push act = Stack.push act cancelation_stack
+
+let rec cancel act = match act with
+    Lemmas 0 -> ()
+  | Nothing -> ()
+  | Lemmas n -> begin lemmas := List.tl !lemmas; cancel (Lemmas (n-1)); end
+  | Sign (si1, si2) -> sign := (si1, si2)
+  | Sr sub -> sr := sub
+  | SignSr ((si1, si2), sub) -> begin cancel (Sign (si1, si2)); cancel (Sr sub); end
+
+let cancel_last () = cancel (Stack.pop cancelation_stack)
+
+let rec cancel_iterate n =
+  if (n != 0) then begin
+    cancel_last (); cancel_iterate (n-1);
+  end
+
 (* Proof processing *)
 
 let query q =
@@ -496,6 +533,7 @@ let rec process () =
               theorem thm ;
               begin try
                 process_proof name ;
+                cancelation_push (Lemmas 1);
                 compile (CTheorem(name, thm)) ;
                 add_lemma name thm ;
               with AbortProof -> () end
@@ -507,12 +545,14 @@ let rec process () =
                    add_lemma n t ;
                    compile (CTheorem(n, t)))
                 thms ;
+              cancelation_push (Lemmas (List.length thms)) ;
         | Define(idtys, udefs) ->
             let ids = List.map fst idtys in
               check_noredef ids;
               let (local_sr, local_sign) = locally_add_global_consts idtys in
               let defs = type_udefs ~sr:local_sr ~sign:local_sign udefs in
                 check_defs ids defs ;
+                cancelation_push (SignSr (!sign,!sr)) ;
                 commit_global_consts local_sr local_sign ;
                 compile (CDefine(idtys, defs)) ;
                 add_defs ids Inductive defs
@@ -522,6 +562,7 @@ let rec process () =
               let (local_sr, local_sign) = locally_add_global_consts idtys in
               let defs = type_udefs ~sr:local_sr ~sign:local_sign udefs in
                 check_defs ids defs ;
+                cancelation_push (SignSr (!sign,!sr)) ;
                 commit_global_consts local_sr local_sign ;
                 compile (CCoDefine(idtys, defs)) ;
                 add_defs ids CoInductive defs
@@ -544,18 +585,31 @@ let rec process () =
         | Query(q) -> query q
         | Kind(ids) ->
             check_noredef ids;
+            let si1, si2 = !sign in cancelation_push (Sign (si1,si2)) ;
             add_global_types ids ;
             compile (CKind ids)
         | Type(ids, ty) ->
             check_noredef ids;
+            cancelation_push (SignSr (!sign, !sr)) ;
             add_global_consts (List.map (fun id -> (id, ty)) ids) ;
-            compile (CType(ids, ty))
+            compile (CType(ids, ty)) ;
         | Close(ids) ->
+            cancelation_push (Sr !sr) ;
             close_types ids ;
             compile
               (CClose(List.map
                         (fun id -> (id, Subordination.subordinates !sr id))
                         ids)) ;
+        | Back(i) ->
+            begin try
+              cancel_iterate i;
+              fprintf !out "went back %i times" i ;
+            with Stack.Empty ->
+              fprintf !out "went back to big bang" ;
+            end
+        | Reset ->
+            reset () ;
+            fprintf !out "reseting" ;
       end ;
       if !interactive then flush stdout ;
       if !annotate then fprintf !out "</pre>%!" ;
@@ -589,7 +643,6 @@ let rec process () =
         interactive_or_exit ()
   done with
   | Failure "eof" -> ()
-
 
 (* Command line and startup *)
 
