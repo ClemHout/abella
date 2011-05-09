@@ -153,10 +153,12 @@ let parse_defs str =
   type_udefs ~sr:!sr ~sign:!sign (Parser.defs Lexer.token (Lexing.from_string str))
 
 let defs_table : defs_table = H.create 10
-let () = H.add defs_table "member"
+let init_defs_table () = H.add defs_table "member"
   (Inductive,
    ["member"],
    parse_defs "member A (A :: L) ; member A (B :: L) := member A L.")
+
+let () = init_defs_table ()
 
 let add_defs ids ty defs =
   List.iter

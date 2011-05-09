@@ -318,7 +318,9 @@ let reset () =
   sign := pervasive_sign ;
   sr := pervasive_sr ;
   can_read_specification := true ;
+  clauses := [];
   H.clear defs_table ;
+  init_defs_table () ;
 
 
 type action =
