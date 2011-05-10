@@ -17,8 +17,8 @@
  'abella "Abella"
  proof-prog-name		"abella"
  proof-terminal-string		"."
- proof-script-comment-start	"%"
- proof-script-comment-end	""
+ proof-script-comment-start-regexp	"%"
+ proof-script-comment-end-regexp	"^[^%^[^%]"
  proof-completed-proof-behaviour 'closeany
  ;proof-goal-command-regexp	"Theorem [:ascii:]+:[:ascii:]+\."
  proof-assistant-home-page	 "http://abella.cs.umn.edu"
@@ -64,5 +64,20 @@
         (setq ans (cons current-cmd ans))))
     (setq span (next-span span 'type)))
   ans)
+
+(defun proof-script-generic-parse-find-comment-end ()
+  "Find the end of the comment point is at the start of.  Nil if not found."
+  (let ((notout t))
+    ;; Find end of comment (NB: doesn't undertand nested comments)
+    (while (and notout (re-search-forward
+			proof-script-comment-end-regexp nil 'movetolimit))
+      (setq notout (proof-buffer-syntactic-context)))
+    ; hack to exclude the comment-end-regexp from the comment
+    (re-search-forward
+			proof-script-comment-end-regexp nil 'movetolimit -1)
+    ; (end of the hack)
+    (not (proof-buffer-syntactic-context))))
+
+
 
 ;;; abella.el ends here
