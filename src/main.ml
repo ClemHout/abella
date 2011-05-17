@@ -43,6 +43,8 @@ let count = ref 0
 
 let witnesses = ref false
 
+let backed = ref false
+
 exception AbortProof
 
 
@@ -629,10 +631,12 @@ let rec process () =
               cancel_iterate i;
               fprintf !out "went back %i times" i ;
             with Stack.Empty ->
-              fprintf !out "went back to big bang" ;
-            end
+              fprintf !out "went back to beginning" ;
+            end ;
+            backed := true ;
         | Reset ->
             reset () ;
+            backed := true;
             fprintf !out "reseting" ;
       end ;
       if !interactive then flush stdout ;
@@ -651,7 +655,9 @@ let rec process () =
         else begin
           fprintf !out "Goodbye.\n%!" ;
           ensure_finalized_specification () ;
-          write_compilation () ;
+          if !backed then
+            fprintf !out "/!\\ Back and Reset commands disable compilation\n%!"
+          else write_compilation () ;
           if !annotate then fprintf !out "</pre>\n%!" ;
           exit 0
         end
