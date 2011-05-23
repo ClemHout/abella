@@ -18,6 +18,7 @@
  proof-prog-name		"abella"
  proof-terminal-string		"."
  proof-script-comment-start-regexp	"%"
+ proof-script-fly-past-comments t
  proof-script-comment-end-regexp	"^[^ *%]"
  proof-completed-proof-behaviour 'closeany
  ;proof-goal-command-regexp	"Theorem [:ascii:]+:[:ascii:]+\."
