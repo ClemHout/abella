@@ -18,7 +18,7 @@
  proof-prog-name		"abella"
  proof-terminal-string		"."
  proof-script-comment-start-regexp	"%"
- proof-script-comment-end-regexp	"^[^%]"
+ proof-script-comment-end-regexp	"^[^ *%]"
  proof-completed-proof-behaviour 'closeany
  ;proof-goal-command-regexp	"Theorem [:ascii:]+:[:ascii:]+\."
  proof-assistant-home-page	 "http://abella.cs.umn.edu"
@@ -52,7 +52,9 @@
     ((eq cmd nil) "helu") ; comment
     ((string-match "Specification.*" cmd) "Reset.")
     ((string-match "Theorem.*" cmd) "abort.")
-    ((string-match "\\(Define\\|CoDefine\\|Kind\\|Type\\|Split\\|Close\\).*" cmd) "Back.")
+    ((string-match
+      "\\(Define\\|CoDefine\\|Kind\\|Type\\|Split\\|Close\\).*"
+      cmd) "Back.")
     (t "undo.")))
 
 (defun abella-find-and-forget-fn (span)
@@ -65,7 +67,7 @@
     (setq span (next-span span 'type)))
   ans)
 
-(defun proof-script-generic-parse-find-comment-end ()
+(defun proof-script-parse-find-comment-end ()
   "Find the end of the comment point is at the start of.  Nil if not found."
   (let ((notout t))
     ;; Find end of comment (NB: doesn't undertand nested comments)
