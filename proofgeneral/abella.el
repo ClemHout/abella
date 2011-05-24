@@ -44,7 +44,7 @@
  proof-shell-start-goals-regexp	 ">>"
  proof-shell-end-goals-regexp	 "<<"
  proof-shell-restart-cmd	 "Reset."
- proof-shell-error-regexp	 "Error:.*\\|\\(Syntax\\|Typing\\) error\."
+ proof-shell-error-regexp	 "Error:.*\\|\\(Syntax\\|Typing\\|Unification\\|Unknown\\) error\."
  proof-save-command-regexp	proof-no-regexp
  proof-find-and-forget-fn   'abella-find-and-forget-fn
  proof-script-syntax-table-entries  abella-mode-syntax-table-entries
