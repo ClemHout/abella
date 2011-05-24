@@ -1,5 +1,9 @@
 # Proof General Mode for Abella #
 
+## Requirements ##
+
+You need Proof General 4.0 installed.
+
 ## Installation ##
 
 Create a directory `abella` where Proof General is installed (i.e. in the same directory as `generic`).

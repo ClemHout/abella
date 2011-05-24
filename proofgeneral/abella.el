@@ -13,6 +13,13 @@
 (require 'proof-easy-config)		; easy configure mechanism
 (require 'abella-syntax)
 
+;; broken : callback for handling specific output
+(defvar abella-shell-handle-output
+  '(lambda (cmd string) 
+      (when (string-match "Proof \\(completed\\|aborted\\)\." string)
+  (proof-clean-buffer proof-goals-buffer)
+)))
+
 (proof-easy-config
  'abella "Abella"
  proof-prog-name		"abella"
@@ -20,10 +27,18 @@
  proof-script-comment-start-regexp	"%"
  proof-script-fly-past-comments t
  proof-script-comment-end-regexp	"^[^ *%]"
+ ;; for clearing goals -> broken
+ ;proof-shell-clear-goals-regexp   "Proof \\(completed\\|aborted\\)\."
+ ;proof-shell-eager-annotation-start "Proof \\(completed\\|aborted\\)\."
+ ;proof-shell-eager-annotation-end ""
+ ;; for grouping proofs -> broken
+ ;proof-goal-command-regexp    "Theorem .*\."
+ ;proof-shell-proof-completed-regexp   "Proof completed\."
+ proof-goal-command-regexp proof-no-regexp
+ proof-shell-proof-completed-regexp proof-no-regexp
  proof-completed-proof-behaviour 'closeany
- ;proof-goal-command-regexp	"Theorem [:ascii:]+:[:ascii:]+\."
  proof-assistant-home-page	 "http://abella.cs.umn.edu"
- proof-shell-annotated-prompt-regexp "^.* < "
+ proof-shell-annotated-prompt-regexp "^.* < $"
  proof-shell-quit-cmd		 "Quit."
  proof-shell-start-goals-regexp	 ">>"
  proof-shell-end-goals-regexp	 "<<"
@@ -35,6 +50,7 @@
  proof-script-font-lock-keywords  abella-script-font-lock-keywords
  proof-goals-font-lock-keywords  abella-goals-font-lock-keywords
  proof-response-font-lock-keywords  abella-response-font-lock-keywords
+ proof-shell-handle-output-system-specific abella-shell-handle-output
  ;proof-non-undoables-regexp	"undo\\|Back\\|Reset\\|abort\\|[a-z].*"
 )
 
@@ -50,7 +66,7 @@
 (defun abella-find-and-forget-cmd (span)
   (setq cmd (span-property span 'cmd))
   (cond
-    ((eq cmd nil) "helu") ; comment
+    ((eq cmd nil) "") ; comment
     ((string-match "Specification.*" cmd) "Reset.")
     ((string-match "Theorem.*" cmd) "abort.")
     ((string-match
@@ -80,7 +96,5 @@
 			proof-script-comment-end-regexp nil 'movetolimit -1)
     ; (end of the hack)
     (not (proof-buffer-syntactic-context))))
-
-
 
 ;;; abella.el ends here
