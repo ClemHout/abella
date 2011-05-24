@@ -44,7 +44,7 @@
  proof-shell-start-goals-regexp	 ">>"
  proof-shell-end-goals-regexp	 "<<"
  proof-shell-restart-cmd	 "Reset."
- proof-shell-error-regexp	 "Error:.*\\|Syntax error\."
+ proof-shell-error-regexp	 "Error:.*\\|\\(Syntax\\|Typing\\) error\."
  proof-save-command-regexp	proof-no-regexp
  proof-find-and-forget-fn   'abella-find-and-forget-fn
  proof-script-syntax-table-entries  abella-mode-syntax-table-entries
@@ -84,18 +84,5 @@
         (setq ans (cons current-cmd ans))))
     (setq span (next-span span 'type)))
   ans)
-
-;(defun proof-script-parse-find-comment-end ()
-;  "Find the end of the comment point is at the start of.  Nil if not found."
-;  (let ((notout t))
-;    ;; Find end of comment (NB: doesn't undertand nested comments)
-;    (while (and notout (re-search-forward
-;			proof-script-comment-end-regexp nil 'movetolimit))
-;      (setq notout (proof-buffer-syntactic-context)))
-;    ; hack to exclude the comment-end-regexp from the comment
-;    (re-search-forward
-;			proof-script-comment-end-regexp nil 'movetolimit -1)
-;    ; (end of the hack)
-;    (not (proof-buffer-syntactic-context))))
 
 ;;; abella.el ends here
