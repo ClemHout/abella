@@ -26,7 +26,8 @@
  proof-terminal-string		"."
  proof-script-comment-start-regexp	"%"
  proof-script-fly-past-comments t
- proof-script-comment-end-regexp	"^[^ *%]"
+ proof-script-comment-end-regexp	"\n"
+ ;proof-script-comment-end-regexp	"^[^ *%]"
  ;; for clearing goals -> broken
  ;proof-shell-clear-goals-regexp   "Proof \\(completed\\|aborted\\)\."
  ;proof-shell-eager-annotation-start "Proof \\(completed\\|aborted\\)\."
@@ -84,17 +85,17 @@
     (setq span (next-span span 'type)))
   ans)
 
-(defun proof-script-parse-find-comment-end ()
-  "Find the end of the comment point is at the start of.  Nil if not found."
-  (let ((notout t))
-    ;; Find end of comment (NB: doesn't undertand nested comments)
-    (while (and notout (re-search-forward
-			proof-script-comment-end-regexp nil 'movetolimit))
-      (setq notout (proof-buffer-syntactic-context)))
-    ; hack to exclude the comment-end-regexp from the comment
-    (re-search-forward
-			proof-script-comment-end-regexp nil 'movetolimit -1)
-    ; (end of the hack)
-    (not (proof-buffer-syntactic-context))))
+;(defun proof-script-parse-find-comment-end ()
+;  "Find the end of the comment point is at the start of.  Nil if not found."
+;  (let ((notout t))
+;    ;; Find end of comment (NB: doesn't undertand nested comments)
+;    (while (and notout (re-search-forward
+;			proof-script-comment-end-regexp nil 'movetolimit))
+;      (setq notout (proof-buffer-syntactic-context)))
+;    ; hack to exclude the comment-end-regexp from the comment
+;    (re-search-forward
+;			proof-script-comment-end-regexp nil 'movetolimit -1)
+;    ; (end of the hack)
+;    (not (proof-buffer-syntactic-context))))
 
 ;;; abella.el ends here
