@@ -50,13 +50,12 @@ end
 
 class Heading < Element
   def initialize(text)
-    text =~ /^%(=+) (.*?) *=* *$/
-    @size = $1.length + 2
-    super($2, :heading)
+    text =~ /^%=+ (.*?) *=*$/
+    super($1, :heading)
   end
 
   def to_s
-    "\n<h#{@size}>#{@text}</h#{@size}>\n"
+    "\n<h2>#{@text}</h2>\n"
   end
 end
 
@@ -292,7 +291,7 @@ def contents(elements)
     if e.text =~ /^Specification "(.*)"/ then
       specification_section = <<-eos
 <div class="section" id="specification">
-<h1 class="title">Executable Specification</h1>
+<h1>Executable Specification</h1>
 
 <a class="view" href="#{$1}.sig">[View #{$1}.sig]</a>
 <a class="view" href="#{$1}.mod">[View #{$1}.mod]</a>
@@ -360,14 +359,14 @@ $(function() {
 </div>
 
 <div class="section">
-<h1 class="title">#{title}</h1>
+<h1>#{title}</h1>
 #{title_comment}
 </div>
 
 #{specification_section}
 
 <div class="section" id="reasoning">
-<h1 class="title">Reasoning</h1>
+<h1>Reasoning</h1>
 <a class="view" href="#{name}">[View #{name}]</a>
 <span id="menubar" />
 <p class="body">
